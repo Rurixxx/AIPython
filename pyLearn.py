@@ -1,14 +1,13 @@
 # import libaries
-import numpy as np
 import torch as tch
 
-# Initialisation
-X = np.array([1, 2, 3, 4], dtype = np.float32)
-Y = np.array([2, 4, 6, 8], dtype = np.float32)
-omega = 0.0
+# Initialisation (Model:'y = 2*x')
+X = tch.tensor([1, 2, 3, 4], dtype = tch.float32)
+Y = tch.tensor([2, 4, 6, 8], dtype = tch.float32)
+omega = tch.tensor(0.0, dtype=tch.float32, requires_grad=True)
 
 lr = 0.01   # Learning  rate  
-n = 10      # Number of iterations
+n = 1000      # Number of iterations
 
 # Model prediction (H)
 def forward(omega, X):
@@ -18,10 +17,6 @@ def forward(omega, X):
 def loss(y, H):
     return ((y-H)**2).mean()
 
-# Gradient of the loss
-def gradient(y, x, H):
-    return np.dot(-2*x, (y-H)).mean()
-
 # Training
 for epoch in range(n):
     # Prediction
@@ -29,11 +24,13 @@ for epoch in range(n):
     # Loss
     L = loss(Y, H)
     # Gradient
-    dLdomega = gradient(Y,X,H)
+    L.backward()
     # Update omega
-    omega -= lr*dLdomega
+    with tch.no_grad():
+        omega -= lr*omega.grad
+    omega.grad.zero_()
 
-    if epoch % 1 == 0:
+    if epoch % 100 == 0:
         print(f'epoch {epoch + 1}: omega = {omega:.3f}, loss = {L:.5f}')
 
 # Check model
