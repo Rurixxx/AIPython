@@ -13,7 +13,18 @@ n = 1000        # Number of iterations
 # Model prediction (H)
 input_size = n_features
 output_size = 1
-model = nn.Linear(input_size, output_size)
+# model = nn.Linear(input_size, output_size)
+
+class linear_regression(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(linear_regression, self).__init__()
+        # Define layers
+        self.lin = nn.Linear(input_dim, output_dim)
+
+    def forward(self, x):
+        return self.lin(x)
+
+model = linear_regression(input_size,output_size)
 
 # Training
 optimizer = tch.optim.SGD(model.parameters(), lr=lr)
