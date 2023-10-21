@@ -1,21 +1,25 @@
 # import libaries
 import torch as tch
 import torch.nn as nn
+import numpy as np
+from sklearn import datasets
+import matplotlib.pyplot as plt
 
 # Initialisation (Model:'y = 2*x')
-X = tch.tensor([[1], [2], [3], [4]], dtype = tch.float32)
-Y = tch.tensor([[2], [4], [6], [8]], dtype = tch.float32)
+X_numpy, Y_numpy = datasets.make_regression(n_samples=100, n_features=1, noise=20,random_state=1)
+X = tch.from_numpy(X_numpy.astype(np.float32))
+Y = tch.from_numpy(Y_numpy.astype(np.float32))
+Y = Y.view(Y.shape[0],1)
 n_samples, n_features = X.shape
-x_test = tch.tensor([5],dtype=tch.float32)
-lr = 0.01       # Learning  rate  
+learnrate = 0.01       # Learning  rate  
 n = 1000        # Number of iterations
 
 # Model prediction (H)
 input_size = n_features
 output_size = 1
-# model = nn.Linear(input_size, output_size)
+model = nn.Linear(input_size, output_size)
 
-class linear_regression(nn.Module):
+"""class linear_regression(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(linear_regression, self).__init__()
         # Define layers
@@ -24,11 +28,12 @@ class linear_regression(nn.Module):
     def forward(self, x):
         return self.lin(x)
 
-model = linear_regression(input_size,output_size)
+model = linear_regression(input_size,output_size)"""
+# Loss
+loss = nn.MSELoss()
 
 # Training
-optimizer = tch.optim.SGD(model.parameters(), lr=lr)
-loss = nn.MSELoss()
+optimizer = tch.optim.SGD(model.parameters(), lr=learnrate)
 for epoch in range(n):
     # Prediction
     H = model(X)
@@ -45,5 +50,12 @@ for epoch in range(n):
         [w, b] = model.parameters()
         print(f'epoch {epoch + 1}: w = {w[0][0]:.3f}, loss = {L:.5f}')
 
+predicted = model(X).detach().numpy()
+
+# Visualisation
+plt.plot(X_numpy,Y_numpy, 'ro')
+plt.plot(X_numpy, predicted, 'b')
+plt.show()
+
 # Check model
-print(f'Prediction autotraining: h(5) = {model(x_test).item():.3f}')
+# print(f'Prediction autotraining: h(5) = {model(x_test).item():.3f}')
